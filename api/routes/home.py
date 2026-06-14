@@ -11,16 +11,17 @@ TARGET_URL = 'https://web1.mgkomik.cc/'
 @home_bp.route('/', methods=['GET'])
 def get_home():
     try:
-        # Ambil proxy dari env var
-        proxy_url = os.getenv('PROXY_URL')
+        # Ambil proxy dari env var + strip spasi
+        proxy_url = os.getenv('PROXY_URL', '').strip()
         proxies = {"http": proxy_url, "https": proxy_url} if proxy_url else None
 
-        # Debug log (cek di Vercel Logs → Functions)
         print(f"[DEBUG] Proxy aktif: {'YES' if proxies else 'NO'}")
         if proxy_url:
             # Hide password di log buat security
             safe_proxy = proxy_url.replace('ay6wftbr1hvu', '***')
             print(f"[DEBUG] Proxy: {safe_proxy}")
+            print(f"[DEBUG] Proxy length: {len(proxy_url)}")
+            print(f"[DEBUG] Proxy first char: '{proxy_url[0]}'")
         print(f"[DEBUG] Target: {TARGET_URL}")
 
         # Request ke target
