@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 from bs4 import BeautifulSoup
-import cloudscraper
+from curl_cffi import requests # Ini senjata rahasia barunya
 
 # Bikin router (Blueprint)
 home_bp = Blueprint('home', __name__)
@@ -10,15 +10,8 @@ TARGET_URL = 'https://web1.mgkomik.cc/'
 @home_bp.route('/', methods=['GET'])
 def get_home():
     try:
-        # Bikin scraper buat nembus Cloudflare
-        scraper = cloudscraper.create_scraper(browser={
-            'browser': 'chrome',
-            'platform': 'windows',
-            'desktop': True
-        })
-        
-        # Fetch HTML
-        response = scraper.get(TARGET_URL)
+        # Nembak web pakai jurus Impersonate Chrome
+        response = requests.get(TARGET_URL, impersonate="chrome110")
         
         if response.status_code != 200:
             return jsonify({
