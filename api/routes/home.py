@@ -11,15 +11,19 @@ TARGET_URL = 'https://web1.mgkomik.cc/'
 @home_bp.route('/', methods=['GET'])
 def get_home():
     try:
-        # Ambil proxy dari environment variable
+        # Ambil proxy dari env var
         proxy_url = os.getenv('PROXY_URL')
         proxies = {"http": proxy_url, "https": proxy_url} if proxy_url else None
 
-        # Debug log (bisa dilihat di Vercel Logs)
+        # Debug log (cek di Vercel Logs → Functions)
         print(f"[DEBUG] Proxy aktif: {'YES' if proxies else 'NO'}")
-        print(f"[DEBUG] Target URL: {TARGET_URL}")
+        if proxy_url:
+            # Hide password di log buat security
+            safe_proxy = proxy_url.replace('ay6wftbr1hvu', '***')
+            print(f"[DEBUG] Proxy: {safe_proxy}")
+        print(f"[DEBUG] Target: {TARGET_URL}")
 
-        # Request ke target pakai curl_cffi + proxy
+        # Request ke target
         response = requests.get(
             TARGET_URL,
             impersonate="chrome110",
@@ -27,14 +31,14 @@ def get_home():
             timeout=30
         )
 
-        print(f"[DEBUG] Status Code: {response.status_code}")
+        print(f"[DEBUG] Status: {response.status_code}")
         print(f"[DEBUG] Content-Length: {len(response.text)}")
 
         if response.status_code != 200:
             return jsonify({
                 "status": False,
                 "message": f"Gagal fetch data, HTTP Status: {response.status_code}",
-                "body_preview": response.text[:300] if hasattr(response, 'text') else "no text"
+                "body_preview": response.text[:500] if hasattr(response, 'text') else "no text"
             }), response.status_code
 
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -136,4 +140,3 @@ def get_home():
             "error": str(e),
             "traceback": traceback.format_exc()
         }), 500
-
