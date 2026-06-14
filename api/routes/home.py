@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify
 from bs4 import BeautifulSoup
-from curl_cffi import requests # Ini senjata rahasia barunya
+from curl_cffi import requests
+import os
 
-# Bikin router (Blueprint)
 home_bp = Blueprint('home', __name__)
 
 TARGET_URL = 'https://web1.mgkomik.cc/'
@@ -10,8 +10,17 @@ TARGET_URL = 'https://web1.mgkomik.cc/'
 @home_bp.route('/', methods=['GET'])
 def get_home():
     try:
-        # Nembak web pakai jurus Impersonate Chrome
-        response = requests.get(TARGET_URL, impersonate="chrome110")
+        # Ambil proxy dari environment variable (Vercel Environment Variables)
+        proxy_url = os.getenv('PROXY_URL')
+        proxies = {"http": proxy_url, "https": proxy_url} if proxy_url else None
+
+        # Request dengan proxy + impersonate
+        response = requests.get(
+            TARGET_URL,
+            impersonate="chrome110",
+            proxies=proxies,
+            timeout=30
+        )
         
         if response.status_code != 200:
             return jsonify({
